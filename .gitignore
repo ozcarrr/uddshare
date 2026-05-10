@@ -1,0 +1,23 @@
+# Python
+Backend/__pycache__/
+Backend/**/__pycache__/
+Backend/venv/
+Backend/.env
+Backend/uploads/
+Backend/*.egg-info/
+Backend/dist/
+Backend/.pytest_cache/
+
+# Flutter
+Frontend/.dart_tool/
+Frontend/build/
+Frontend/.flutter-plugins
+Frontend/.flutter-plugins-dependencies
+Frontend/.packages
+Frontend/pubspec.lock
+
+# General
+*.pyc
+*.pyo
+.DS_Store
+Thumbs.db
