@@ -32,7 +32,7 @@ class ListingModel {
         sellerId: json['seller_id'] as String,
         title: json['title'] as String,
         description: json['description'] as String?,
-        price: (json['price'] as num).toDouble(),
+        price: double.parse(json['price'].toString()),
         category: json['category'] as String,
         condition: json['condition'] as String,
         status: json['status'] as String,
