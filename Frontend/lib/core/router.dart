@@ -6,6 +6,7 @@ import '../features/auth/screens/register_screen.dart';
 import '../features/marketplace/screens/marketplace_screen.dart';
 import '../features/marketplace/screens/listing_detail_screen.dart';
 import '../features/marketplace/screens/create_listing_screen.dart';
+import '../features/marketplace/screens/edit_listing_screen.dart';
 import '../features/notes/screens/notes_screen.dart';
 import '../features/notes/screens/upload_note_screen.dart';
 
@@ -43,6 +44,12 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/marketplace/:id',
         builder: (_, state) => ListingDetailScreen(
+          listingId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/marketplace/:id/edit',
+        builder: (_, state) => EditListingScreen(
           listingId: state.pathParameters['id']!,
         ),
       ),

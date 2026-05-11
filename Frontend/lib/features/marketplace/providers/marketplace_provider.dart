@@ -116,6 +116,36 @@ class MarketplaceProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateListing(
+    String id, {
+    String? title,
+    String? description,
+    double? price,
+    String? category,
+    String? condition,
+  }) async {
+    try {
+      final data = <String, dynamic>{};
+      if (title != null) data['title'] = title;
+      if (description != null) data['description'] = description;
+      if (price != null) data['price'] = price;
+      if (category != null) data['category'] = category;
+      if (condition != null) data['condition'] = condition;
+      final response = await _dio.patch('/listings/$id', data: data);
+      final updated = ListingModel.fromJson(response.data as Map<String, dynamic>);
+      final idx = _listings.indexWhere((l) => l.id == id);
+      if (idx >= 0) {
+        _listings[idx] = updated;
+        notifyListeners();
+      }
+      return true;
+    } on DioException catch (e) {
+      _error = _extractError(e, 'Error al actualizar publicación');
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> deleteListing(String id) async {
     try {
       await _dio.delete('/listings/$id');

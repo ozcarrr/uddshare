@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/notes_provider.dart';
 import '../../../core/constants.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../../../shared/widgets/app_bar.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 
@@ -51,6 +52,7 @@ class _NotesScreenState extends State<NotesScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<NotesProvider>();
+    final currentUserId = context.watch<AuthProvider>().user?.id;
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: const UDDAppBar(),
@@ -183,11 +185,14 @@ class _NotesScreenState extends State<NotesScreen> {
                                     childAspectRatio: 0.85,
                                   ),
                                   itemCount: provider.notes.length,
-                                  itemBuilder: (_, i) => _NoteCard(
-                                    note: provider.notes[i],
-                                    onDownload: () =>
-                                        _download(provider.notes[i]),
-                                  ),
+                                  itemBuilder: (_, i) {
+                                    final note = provider.notes[i];
+                                    return _NoteCard(
+                                      note: note,
+                                      onDownload: () => _download(note),
+                                      currentUserId: currentUserId,
+                                    );
+                                  },
                                 );
                               },
                             ),
@@ -234,8 +239,13 @@ class _NotesScreenState extends State<NotesScreen> {
 class _NoteCard extends StatelessWidget {
   final NoteModel note;
   final VoidCallback onDownload;
+  final String? currentUserId;
 
-  const _NoteCard({required this.note, required this.onDownload});
+  const _NoteCard({
+    required this.note,
+    required this.onDownload,
+    this.currentUserId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -246,7 +256,7 @@ class _NoteCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon + file type badge
+            // Icon + file type badge + menu
             Row(
               children: [
                 Container(
@@ -274,6 +284,47 @@ class _NoteCard extends StatelessWidget {
                           color: Colors.grey.shade700,
                           fontWeight: FontWeight.w600),
                     ),
+                  ),
+                if (currentUserId != null && currentUserId == note.uploaderId)
+                  PopupMenuButton<String>(
+                    icon: Icon(Icons.more_vert, size: 18, color: Colors.grey.shade600),
+                    itemBuilder: (_) => [
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: ListTile(
+                          leading: Icon(Icons.delete_outlined, color: Colors.red),
+                          title: Text('Eliminar', style: TextStyle(color: Colors.red)),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ],
+                    onSelected: (value) async {
+                      if (value == 'delete') {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text('¿Eliminar apunte?'),
+                            content: Text(
+                                '¿Eliminar "${note.title}"? Esta acción no se puede deshacer.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('Cancelar'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                style: TextButton.styleFrom(
+                                    foregroundColor: Colors.red),
+                                child: const Text('Eliminar'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true && context.mounted) {
+                          context.read<NotesProvider>().deleteNote(note.id);
+                        }
+                      }
+                    },
                   ),
               ],
             ),

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/marketplace_provider.dart';
 import '../../../core/constants.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../../../shared/widgets/app_bar.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 
@@ -44,6 +45,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<MarketplaceProvider>();
+    final currentUserId = context.watch<AuthProvider>().user?.id;
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: const UDDAppBar(),
@@ -180,6 +182,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                 itemBuilder: (_, i) => _ListingCard(
                                   listing: provider.listings[i],
                                   formatPrice: _formatPrice,
+                                  currentUserId: currentUserId,
                                 ),
                               );
                             }),
@@ -196,87 +199,158 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 class _ListingCard extends StatelessWidget {
   final ListingModel listing;
   final String Function(double) formatPrice;
+  final String? currentUserId;
 
-  const _ListingCard({required this.listing, required this.formatPrice});
+  const _ListingCard({
+    required this.listing,
+    required this.formatPrice,
+    this.currentUserId,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final isOwner = currentUserId != null && currentUserId == listing.sellerId;
     return Card(
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.go('/marketplace/${listing.id}'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image
-            AspectRatio(
-              aspectRatio: 4 / 3,
-              child: listing.imageUrl != null
-                  ? Image.network(
-                      '${AppConstants.uploadsBaseUrl}${listing.imageUrl}',
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _PlaceholderImage(),
-                    )
-                  : _PlaceholderImage(),
-            ),
-            // Content
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      listing.title,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w600, fontSize: 15),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-                    if (listing.description != null)
-                      Text(
-                        listing.description!,
-                        style: TextStyle(
-                            color: Colors.grey.shade600, fontSize: 13),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    const Spacer(),
-                    // Badges
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
+      child: Stack(
+        children: [
+          InkWell(
+            onTap: () => context.go('/marketplace/${listing.id}'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Image
+                AspectRatio(
+                  aspectRatio: 4 / 3,
+                  child: listing.imageUrl != null
+                      ? Image.network(
+                          '${AppConstants.uploadsBaseUrl}${listing.imageUrl}',
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _PlaceholderImage(),
+                        )
+                      : _PlaceholderImage(),
+                ),
+                // Content
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _Badge(
-                          label: AppConstants.categoryLabels[listing.category] ??
-                              listing.category,
-                          color: Colors.blue.shade50,
-                          textColor: Colors.blue.shade800,
+                        Text(
+                          listing.title,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600, fontSize: 15),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        _Badge(
-                          label: AppConstants.conditionLabels[listing.condition] ??
-                              listing.condition,
-                          color: Colors.green.shade50,
-                          textColor: Colors.green.shade800,
+                        const SizedBox(height: 6),
+                        if (listing.description != null)
+                          Text(
+                            listing.description!,
+                            style: TextStyle(
+                                color: Colors.grey.shade600, fontSize: 13),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        const Spacer(),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: [
+                            _Badge(
+                              label: AppConstants.categoryLabels[listing.category] ??
+                                  listing.category,
+                              color: Colors.blue.shade50,
+                              textColor: Colors.blue.shade800,
+                            ),
+                            _Badge(
+                              label: AppConstants.conditionLabels[listing.condition] ??
+                                  listing.condition,
+                              color: Colors.green.shade50,
+                              textColor: Colors.green.shade800,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          formatPrice(listing.price),
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF005293),
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      formatPrice(listing.price),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF005293),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
+              ],
+            ),
+          ),
+          if (isOwner)
+            Positioned(
+              top: 4,
+              right: 4,
+              child: PopupMenuButton<String>(
+                icon: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.black38,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Icon(Icons.more_vert, color: Colors.white, size: 18),
+                ),
+                itemBuilder: (_) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: ListTile(
+                      leading: Icon(Icons.edit_outlined),
+                      title: Text('Editar'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: ListTile(
+                      leading: Icon(Icons.delete_outlined, color: Colors.red),
+                      title: Text('Eliminar', style: TextStyle(color: Colors.red)),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
+                onSelected: (value) async {
+                  if (value == 'edit') {
+                    context.go('/marketplace/${listing.id}/edit');
+                  } else if (value == 'delete') {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('¿Eliminar publicación?'),
+                        content: Text(
+                            '¿Eliminar "${listing.title}"? Esta acción no se puede deshacer.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancelar'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            style: TextButton.styleFrom(
+                                foregroundColor: Colors.red),
+                            child: const Text('Eliminar'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true && context.mounted) {
+                      context.read<MarketplaceProvider>().deleteListing(listing.id);
+                    }
+                  }
+                },
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
