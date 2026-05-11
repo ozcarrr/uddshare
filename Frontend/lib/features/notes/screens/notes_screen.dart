@@ -215,7 +215,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    '¿Quieres compartir tus apuntes? Ayuda a la comunidad UDD subiendo tus resúmenes. '
+                    'Quieres compartir tus apuntes? Ayuda a la comunidad UDD subiendo tus resumenes. '
                     'Todos los materiales son gratuitos.',
                     style: TextStyle(color: Colors.blue.shade800, fontSize: 13),
                   ),
@@ -256,7 +256,7 @@ class _NoteCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon + file type badge + menu
+            // Icon + file type badge + owner menu
             Row(
               children: [
                 Container(
@@ -303,9 +303,9 @@ class _NoteCard extends StatelessWidget {
                         final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (_) => AlertDialog(
-                            title: const Text('¿Eliminar apunte?'),
+                            title: const Text('Eliminar apunte?'),
                             content: Text(
-                                '¿Eliminar "${note.title}"? Esta acción no se puede deshacer.'),
+                                'Eliminar "${note.title}"? Esta accion no se puede deshacer.'),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, false),
@@ -360,7 +360,7 @@ class _NoteCard extends StatelessWidget {
             const SizedBox(height: 12),
             const Divider(height: 1),
             const SizedBox(height: 10),
-            // Downloads + date + download button
+            // Downloads + download button
             Row(
               children: [
                 Icon(Icons.download, size: 16, color: Colors.grey.shade500),

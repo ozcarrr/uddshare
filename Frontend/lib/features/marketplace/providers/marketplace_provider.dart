@@ -77,7 +77,7 @@ class MarketplaceProvider extends ChangeNotifier {
       final response = await _dio.get('/listings/$id');
       _selected = ListingModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      _error = _extractError(e, 'Error al cargar la publicación');
+      _error = _extractError(e, 'Error al cargar la publicacion');
     } finally {
       _setLoading(false);
     }
@@ -108,7 +108,7 @@ class MarketplaceProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } on DioException catch (e) {
-      _error = _extractError(e, 'Error al crear publicación');
+      _error = _extractError(e, 'Error al crear publicacion');
       notifyListeners();
       return false;
     } finally {
@@ -140,7 +140,7 @@ class MarketplaceProvider extends ChangeNotifier {
       }
       return true;
     } on DioException catch (e) {
-      _error = _extractError(e, 'Error al actualizar publicación');
+      _error = _extractError(e, 'Error al actualizar publicacion');
       notifyListeners();
       return false;
     }
@@ -153,7 +153,7 @@ class MarketplaceProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } on DioException catch (e) {
-      _error = _extractError(e, 'Error al eliminar publicación');
+      _error = _extractError(e, 'Error al eliminar publicacion');
       notifyListeners();
       return false;
     }

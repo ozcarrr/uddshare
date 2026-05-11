@@ -326,9 +326,9 @@ class _ListingCard extends StatelessWidget {
                     final confirmed = await showDialog<bool>(
                       context: context,
                       builder: (_) => AlertDialog(
-                        title: const Text('¿Eliminar publicación?'),
+                        title: const Text('Eliminar publicacion'),
                         content: Text(
-                            '¿Eliminar "${listing.title}"? Esta acción no se puede deshacer.'),
+                            'Eliminar "${listing.title}"? Esta accion no se puede deshacer.'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context, false),

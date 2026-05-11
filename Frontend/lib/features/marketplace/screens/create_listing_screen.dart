@@ -229,7 +229,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                             Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: Text(
-                                '📎 $_imageFileName',
+                                _imageFileName!,
                                 style: TextStyle(
                                     color: Colors.grey.shade600, fontSize: 12),
                               ),
